@@ -4,6 +4,7 @@ import com.wafflestudio.seminar.core.seminar.api.request.*
 import com.wafflestudio.seminar.core.seminar.database.*
 import com.wafflestudio.seminar.core.user.UserTestHelper
 import com.wafflestudio.seminar.core.user.database.UserEntity
+import com.wafflestudio.seminar.core.user.database.UserRepository
 import com.wafflestudio.seminar.core.user.domain.User
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import java.time.LocalTime
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.springframework.data.repository.findByIdOrNull
 import java.time.LocalDateTime
 
@@ -21,14 +23,20 @@ internal class SeminarServiceImplTest @Autowired constructor(
     private val seminarRepository: SeminarRepository,
     private val userTestHelper: UserTestHelper,
     private val userSeminarRepository: UserSeminarRepository,
-    private val userSeminarRepositorySupport: UserSeminarRepositorySupport
+    private val userSeminarRepositorySupport: UserSeminarRepositorySupport,
+    private val userRepository: UserRepository
 ) {
+    @BeforeEach
+    fun deleteAllUser() {
+        userRepository.deleteAll()
+        seminarRepository.deleteAll()
+    }
     
     @Test
     @DisplayName("세미나 만들기 기능")
     fun makeSeminar() {
         // given - 진행자가 존재할 때
-        val instructor = userTestHelper.createInstructor("newinstructor1@snu.ac.kr")
+        val instructor = userTestHelper.createInstructor("instructor@snu.ac.kr")
 
         // when - 진행자가 세미나를 만들면
         val newSeminar = SeminarRequest("세미나1", 10, 10, LocalTime.of(10, 10))
@@ -43,7 +51,7 @@ internal class SeminarServiceImplTest @Autowired constructor(
     @DisplayName("세미나 수정하기")
     fun editSeminar() {
         // given - 세미나가 존재할 때
-        val instructor = userTestHelper.createInstructor("newinstructor2@snu.ac.kr")
+        val instructor = userTestHelper.createInstructor("instructor@snu.ac.kr")
         val seminar = createSeminar(instructor)
 
         // when - 세미나의 정보를 수정하면
@@ -60,7 +68,7 @@ internal class SeminarServiceImplTest @Autowired constructor(
     @DisplayName("세미나 가져오기")
     fun getSeminar() {
         // given - 세미나가 존재할 때
-        val instructor = userTestHelper.createInstructor("newinstructor5@snu.ac.kr")
+        val instructor = userTestHelper.createInstructor("instructor@snu.ac.kr")
         val seminar = createSeminar(instructor)
         
         // when - 세미나를 부르면
@@ -91,8 +99,8 @@ internal class SeminarServiceImplTest @Autowired constructor(
     @DisplayName("세미나 참여하기")
     fun addSeminar() {
         // given - 참여자와 세미나가 존재할 때
-        val participant = userTestHelper.createParticipant("newparticipant1@naver.com")
-        val instructor = userTestHelper.createInstructor("newinstructor@naver.com")
+        val participant = userTestHelper.createParticipant("participant@naver.com")
+        val instructor = userTestHelper.createInstructor("instructor@naver.com")
         val seminar = createSeminar(instructor)
         
         // when - 참여자가 세미나에 참여하고자 하면
@@ -108,8 +116,8 @@ internal class SeminarServiceImplTest @Autowired constructor(
     @DisplayName("세미나 드랍하기")
     fun dropSeminar() {
         // given - 세미나에 참여자가 존재할 때
-        val participant = userTestHelper.createParticipant("newparticipant1@naver.com")
-        val instructor = userTestHelper.createInstructor("newinstructor@naver.com")
+        val participant = userTestHelper.createParticipant("participant@naver.com")
+        val instructor = userTestHelper.createInstructor("instructor@naver.com")
         val seminar = createSeminar(instructor)
         val newUserSeminar = UserSeminarEntity(participant, seminar, User.Role.PARTICIPANT, LocalDateTime.now(), null)
         userSeminarRepository.save(newUserSeminar)
